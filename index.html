@@ -1,0 +1,1899 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Análise das Internações Hospitalares no Espírito Santo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tiempos+Headline:wght@400;700&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --color-primary: #2563eb;
+            --color-secondary: #64748b;
+            --color-accent: #dc2626;
+            --color-success: #059669;
+            --color-warning: #d97706;
+            --color-info: #0891b2;
+            --color-background: #ffffff;
+            --color-surface: #f8fafc;
+            --color-muted: #94a3b8;
+            --color-border: #e2e8f0;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-background);
+            color: #1e293b;
+            line-height: 1.7;
+        }
+        
+        .font-display {
+            font-family: 'Tiempos Headline', serif;
+        }
+        
+        .hero-gradient {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+        }
+        
+        .toc-sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px;
+            height: 100vh;
+            background: var(--color-surface);
+            border-right: 1px solid var(--color-border);
+            z-index: 40;
+            overflow-y: auto;
+            padding: 2rem 1.5rem;
+        }
+        
+        .main-content {
+            margin-left: 280px;
+            min-height: 100vh;
+        }
+        
+        .toc-link {
+            display: block;
+            padding: 0.5rem 0;
+            color: var(--color-secondary);
+            text-decoration: none;
+            border-left: 2px solid transparent;
+            padding-left: 1rem;
+            margin-left: -1rem;
+            transition: all 0.2s ease;
+        }
+        
+        .toc-link:hover,
+        .toc-link.active {
+            color: var(--color-primary);
+            border-left-color: var(--color-primary);
+            background-color: rgba(37, 99, 235, 0.05);
+        }
+        
+        .toc-link.sub {
+            font-size: 0.875rem;
+            margin-left: 0.5rem;
+            padding-left: 0.5rem;
+        }
+        
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, var(--color-border) 0%, transparent 100%);
+            margin: 3rem 0;
+        }
+        
+        .insight-highlight {
+            background: linear-gradient(135deg, #fef3c7 0%, #fbbf24 100%);
+            border-left: 4px solid #f59e0b;
+        }
+        
+        .data-card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .data-card:hover {
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .citation {
+            color: var(--color-primary);
+            text-decoration: none;
+            font-weight: 500;
+            border-bottom: 1px dotted var(--color-primary);
+        }
+        
+        .citation:hover {
+            background-color: rgba(37, 99, 235, 0.1);
+            padding: 0 0.25rem;
+            border-radius: 0.25rem;
+        }
+        
+        .bento-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            grid-template-rows: auto auto;
+            gap: 2rem;
+            height: 60vh;
+        }
+        
+        .bento-main {
+            grid-row: span 2;
+            position: relative;
+            overflow: hidden;
+            border-radius: 1rem;
+        }
+        
+        .bento-side {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .hero-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.6) 50%, rgba(51, 65, 85, 0.4) 100%);
+            z-index: 2;
+        }
+        
+        @media (max-width: 1024px) {
+            .toc-sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .toc-sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .bento-grid {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+            
+            .bento-main {
+                grid-row: span 1;
+                height: 40vh;
+            }
+            
+            .bento-side {
+                gap: 1rem;
+            }
+            
+            .hero-gradient h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero-gradient p {
+                font-size: 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .hero-gradient h1 {
+                font-size: 2rem;
+            }
+            
+            .hero-gradient p {
+                font-size: 0.875rem;
+            }
+            
+            .bento-main {
+                height: 35vh;
+            }
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 12px;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #1e40af;
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+        .high-rate {
+            background-color: #fecaca;
+            color: #7f1d1d;
+            font-weight: bold;
+        }
+        .low-rate {
+            background-color: #bbf7d0;
+            color: #14532d;
+            font-weight: bold;
+        }
+        .medium-rate {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        .high-icsab {
+            background-color: #fed7d7;
+            color: #991b1b;
+        }
+        .low-icsab {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+    </style>
+  </head>
+
+  <body>
+    <!-- Table of Contents Sidebar -->
+    <nav class="toc-sidebar">
+      <div class="mb-8">
+        <h3 class="font-display font-bold text-lg text-slate-900 mb-4">Sumário</h3>
+      </div>
+
+      <div class="space-y-1">
+        <a class="toc-link" href="#hero">Visão Geral</a>
+        <a class="toc-link" href="#executive-summary">Resumo Executivo</a>
+        <a class="toc-link" href="#identificacao">1. Identificação de Desvios</a>
+        <a class="toc-link sub" href="#municipios-acima-meta">1.1 Municípios Acima da Meta</a>
+        <a class="toc-link sub" href="#municipios-abaixo-meta">1.2 Municípios Abaixo da Meta</a>
+        <a class="toc-link" href="#analise-relacao">2. Análise de Relações</a>
+        <a class="toc-link sub" href="#complexidade">2.1 Distribuição por Complexidade</a>
+        <a class="toc-link sub" href="#icsab">2.2 Índice ICSAB</a>
+        <a class="toc-link" href="#causas-subjacentes">3. Causas Subjacentes</a>
+        <a class="toc-link sub" href="#fatores-socioeconomicos">3.1 Fatores Socioeconômicos</a>
+        <a class="toc-link sub" href="#fatores-regionais">3.2 Fatores Regionais</a>
+        <a class="toc-link" href="#implicacoes">4. Implicações</a>
+        <a class="toc-link sub" href="#planejamento">4.1 Planejamento em Saúde</a>
+        <a class="toc-link sub" href="#alocacao-recursos">4.2 Alocação de Recursos</a>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Hero Section -->
+      <section class="hero-gradient relative overflow-hidden" id="hero">
+        <div class="container mx-auto px-8 py-16">
+          <div class="bento-grid">
+            <!-- Main Hero Content -->
+            <div class="bento-main">
+              <img alt="Sistema de saúde do Espírito Santo" class="absolute inset-0 w-full h-full object-cover" src="https://kimi-img.moonshot.cn/pub/icon/spinner.svg" size="wallpaper" aspect="wide" query="sistema de saúde Espírito Santo" referrerpolicy="no-referrer" />
+              <div class="hero-overlay"></div>
+              <div class="relative z-10 h-full flex flex-col justify-center p-8">
+                <h1 class="font-display text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
+                  <em class="italic">Análise das Internações Hospitalares</em>
+                  <br />
+                  <span class="text-2xl lg:text-3xl font-normal text-blue-200">no Espírito Santo</span>
+                </h1>
+                <p class="text-xl text-blue-100 max-w-2xl">
+                  Desvios da Meta e Implicações para o Planejamento em Saúde
+                </p>
+              </div>
+            </div>
+
+            <!-- Side Cards -->
+            <div class="bento-side">
+              <div class="data-card flex-1">
+                <div class="flex items-center mb-3">
+                  <i class="fas fa-exclamation-triangle text-red-500 mr-3"></i>
+                  <h3 class="font-semibold text-slate-900">Situação Crítica</h3>
+                </div>
+                <p class="text-sm text-slate-600">31 municípios apresentam taxas de internação superiores à meta de 8%</p>
+              </div>
+
+              <div class="data-card flex-1">
+                <div class="flex items-center mb-3">
+                  <i class="fas fa-chart-line text-blue-500 mr-3"></i>
+                  <h3 class="font-semibold text-slate-900">ICSAB Elevado</h3>
+                </div>
+                <p class="text-sm text-slate-600">Média estadual de 28% indica fragilidade na atenção primária</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Executive Summary -->
+      <section class="py-16 px-8" id="executive-summary">
+        <div class="container mx-auto max-w-4xl">
+          <div class="insight-highlight rounded-xl p-8 mb-12">
+            <h2 class="font-display text-2xl font-bold text-slate-900 mb-6">Resumo Executivo</h2>
+            <div class="prose prose-lg max-w-none">
+              <p class="text-slate-700 leading-relaxed">
+                A análise das internações hospitalares no Espírito Santo para 2025 revela uma situação de alerta em diversos municípios.
+                <strong class="text-slate-900">31 municípios apresentam taxas de internação superiores à meta de 8%</strong>, com
+                <strong class="text-red-600">Pedro Canário (13,10%)</strong>,
+                <strong class="text-red-600">Santa Teresa (12,80%)</strong> e
+                <strong class="text-red-600">Santa Maria de Jetibá (12,70%)</strong> sendo os casos mais extremos.
+              </p>
+
+              <p class="text-slate-700 leading-relaxed mt-4">
+                Essas altas taxas estão fortemente correlacionadas com um
+                <strong class="text-slate-900">Índice de Internações por Condições Sensíveis à Atenção Básica (ICSAB) elevado</strong>,
+                indicando que a atenção primária não está sendo efetiva na prevenção de hospitalizações. A análise dos fatores socioeconômicos
+                e ambientais mostra que problemas como saneamento inadequado, baixo Índice de Desenvolvimento Humano (IDH) e barreiras culturais
+                contribuem significativamente para esses desvios.
+              </p>
+
+              <p class="text-slate-700 leading-relaxed mt-4">
+                O relatório conclui que é imperativo priorizar investimentos no fortalecimento da atenção básica e implementar ações
+                intersetoriais para melhorar as condições de vida da população e, consequentemente, reduzir as taxas de internação.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 1: Identificação -->
+      <section class="py-16 px-8 bg-slate-50" id="identificacao">
+        <div class="container mx-auto max-w-6xl">
+          <div class="mb-12">
+            <h2 class="font-display text-3xl font-bold text-slate-900 mb-4">
+              1. Identificação de Municípios com Indicadores de Internação Fora da Meta
+            </h2>
+            <p class="text-lg text-slate-600 max-w-4xl">
+              A meta estabelecida para a taxa de internação da população situa-se entre 6% e 8%.
+              No entanto, um número significativo de municípios apresenta taxas que se desviam consideravelmente desse intervalo.
+            </p>
+          </div>
+
+          <!-- Subsection 1.1 -->
+          <div class="mb-16" id="municipios-acima-meta">
+            <h3 class="font-display text-2xl font-semibold text-slate-900 mb-8">1.1 Municípios com Taxa de Internação Superior a 8%</h3>
+
+            <div class="mb-8">
+              <div class="insight-highlight rounded-lg p-6 mb-8">
+                <h4 class="font-semibold text-slate-900 mb-3">Casos Críticos</h4>
+                <div class="grid md:grid-cols-3 gap-6">
+                  <div class="text-center">
+                    <div class="text-3xl font-bold text-red-600">13,10%</div>
+                    <div class="text-sm text-slate-600">Pedro Canário</div>
+                  </div>
+                  <div class="text-center">
+                    <div class="text-3xl font-bold text-red-600">12,80%</div>
+                    <div class="text-sm text-slate-600">Santa Teresa</div>
+                  </div>
+                  <div class="text-center">
+                    <div class="text-3xl font-bold text-red-600">12,70%</div>
+                    <div class="text-sm text-slate-600">Santa Maria de Jetibá</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8 mb-8">
+              <div class="data-card">
+                <h4 class="font-semibold text-slate-900 mb-4">Pedro Canário: Análise Detalhada</h4>
+                <ul class="space-y-2 text-sm text-slate-600">
+                  <li><strong>Taxa de Internação:</strong> 13,10% (maior do estado)</li>
+                  <li><strong>ICSAB:</strong> 42% (maior do estado)</li>
+                  <li><strong>IDH:</strong> 0,654 (muito baixo) <a class="citation" href="https://www.ibge.gov.br/cidades-e-estados/es/pedro-canario.html" target="_blank">[IBGE]</a>
+                  </li>
+                  <li><strong>População:</strong> 21.522 habitantes</li>
+                  <li><strong>Declínio populacional:</strong> 9,55% desde 2010</li>
+                </ul>
+              </div>
+
+              <div class="data-card">
+                <h4 class="font-semibold text-slate-900 mb-4">Fatores Contribuintes</h4>
+                <ul class="space-y-2 text-sm text-slate-600">
+                  <li>• Saneamento ambiental inadequado</li>
+                  <li>• Baixo IDH (0,654)</li>
+                  <li>• Alta taxa de DRSAI (1.798/10.000 hab)</li>
+                  <li>• <a class="citation" href="https://abes-dn.org.br/anaiseletronicos/32cbesa/987_tema_vii.pdf" target="_blank">Doenças relacionadas ao saneamento [ABES]</a>
+                  </li>
+                  <li>• Declínio populacional acelerado</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Subsection 1.2 -->
+          <div id="municipios-abaixo-meta">
+            <h3 class="font-display text-2xl font-semibold text-slate-900 mb-8">1.2 Municípios com Taxa de Internação Inferior a 6%</h3>
+
+            <div class="insight-highlight rounded-lg p-6 mb-8">
+              <h4 class="font-semibold text-slate-900 mb-3">Possível Subutilização</h4>
+              <p class="text-slate-700 mb-4">
+                11 municípios apresentam taxas abaixo do limite inferior da meta. Essa situação pode indicar
+                barreiras de acesso que impedem a população de buscar o cuidado necessário.
+              </p>
+              <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                  <div class="text-xl font-bold text-blue-600">3,90%</div>
+                  <div class="text-sm text-slate-600">Água Doce do Norte e Barra de São Francisco</div>
+                </div>
+                <div>
+                  <div class="text-xl font-bold text-blue-600">4,80%</div>
+                  <div class="text-sm text-slate-600">Ecoporanga e Mantenópolis</div>
+                </div>
+              </div>
+            </div>
+          </div>
+	      <p class="text-slate-700 mb-4">
+                A identificação de municípios capixabas com taxa de internação hospitalar inferior a 6%, índice considerado muito abaixo da média esperada para a maioria das populações, não deve ser interpretada, a priori, como indicador de boa saúde ou eficiência do sistema local. Ao contrário, esse dado pode revelar <b>falhas críticas no registro das internações no Sistema de Informação Hospitalar (SIH/SUS)</b> ou, ainda mais comum no contexto regional, a <b>migração assistencial de usuários do SUS para municípios vizinhos em Minas Gerais</b>.
+</p>
+<p class="text-slate-700 mb-4">
+Especialmente na região Noroeste do Espírito Santo, onde diversos municípios fazem divisão com o estado mineiro, é frequente que a população busque atendimento hospitalar em cidades como Nanuque, Carlos Chagas, Itambacuri ou Teófilo Otoni , seja por proximidade geográfica , maior oferta de leitos e serviços especializados , ou percepção de melhor qualidade de atendimento. Como essas internações são registradas no SIH do estado de Minas Gerais, os dados não são computados no Espírito Santo, gerando uma subnotificação artificial que distorce os indicadores de morbidade, utilização e planejamento da rede local.
+</p>
+
+
+<h4 class="font-semibold text-slate-900 mb-3">Essa “fuga de demanda” tem implicações graves:</h4>
+<p class="text-slate-700 mb-4">
+Subdimensionamento da necessidade real de leitos e serviços no ES; <br>
+Distorção dos indicadores de desempenho e eficiência dos municípios; <br>
+Prejuízo no rateio de recursos federais e estaduais , que muitas vezes são alocados com base em dados de utilização; <br>
+Fragmentação do cuidado , com perda de vínculo e continuidade entre atenção primária e hospitalar.<br>
+Além disso, a ausência de acordos formais de regulação interfederativa ou de compensação financeira por atendimentos interestaduais agrava o desequilíbrio, deixando os municípios capixabas sem os recursos necessários para fortalecer sua própria rede, enquanto os municípios mineiros — que atendem essa demanda — não são devidamente ressarcidos pelo SUS capixaba.
+</p>
+
+<h4 class="font-semibold text-slate-900 mb-3">Recomenda-se, portanto: </h4>
+<p class="text-slate-700 mb-4">
+Auditoria dos sistemas de informação locais para identificar subnotificação; <br>
+Estudos de fluxo populacional e pactuação de dados com municípios mineiros limítrofes; <br>
+Celebração de acordos de cooperação técnica e financeira entre ES e MG, conforme previsto na NOAS-SUS 01/2002; <br>
+Fortalecimento da rede local para atender a demanda, com ampliação da resolutividade hospitalar e ambulatorial; <br>
+Inclusão desses fluxos migratórios nos planos municipais e regionais de saúde, para um planejamento mais realista e equitativo.
+</p>
+
+
+
+
+
+        </div>
+      </section>
+
+      <div class="section-divider"></div>
+
+      <!-- Section 2: Análise de Relação -->
+      <section class="py-16 px-8" id="analise-relacao">
+        <div class="container mx-auto max-w-6xl">
+          <div class="mb-12">
+            <h2 class="font-display text-3xl font-bold text-slate-900 mb-4">
+              2. Análise da Relação entre Complexidade, ICSAB e Taxa de Internação
+            </h2>
+            <p class="text-lg text-slate-600 max-w-4xl">
+              A compreensão da dinâmica do sistema de saúde requer a análise integrada de diferentes métricas
+              e a identificação das relações entre elas.
+            </p>
+          </div>
+
+          <!-- Subsection 2.1 -->
+          <div class="mb-16" id="complexidade">
+            <h3 class="font-display text-2xl font-semibold text-slate-900 mb-8">2.1 A Distribuição entre Média e Alta Complexidade</h3>
+
+            <div class="insight-highlight rounded-lg p-6 mb-8">
+              <h4 class="font-semibold text-slate-900 mb-3">Padrão Identificado</h4>
+              <p class="text-slate-700">
+                Em praticamente todos os municípios com taxas de internação acima da meta (8%),
+                observa-se uma predominância marcante de internações de média complexidade.
+                A média estadual é de <strong>90,70%</strong> para internações de média complexidade.
+              </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+              <div class="data-card">
+                <h4 class="font-semibold text-slate-900 mb-4">Municípios com Alta Proporção de Alta Complexidade</h4>
+                <ul class="space-y-2 text-sm text-slate-600">
+                  <li><strong>Mantenópolis:</strong> 24,40%</li>
+                  <li><strong>Itaguaçu:</strong> 22,90%</li>
+                  <li><strong>Barra de São Francisco:</strong> 17,90%</li>
+                  <li><strong>Ecoporanga:</strong> 16,20%</li>
+                </ul>
+                <p class="text-xs text-slate-500 mt-3">
+                  Pode indicar subutilização dos serviços de média complexidade
+                </p>
+              </div>
+
+              <div class="data-card">
+                <h4 class="font-semibold text-slate-900 mb-4">Implicações</h4>
+                <p class="text-sm text-slate-600 mb-4">
+                  A alta predominância de média complexidade em municípios com taxas elevadas sugere
+                  que a atenção primária não está sendo efetiva na resolução de problemas de saúde,
+                  levando a uma demanda excessiva por leitos hospitalares.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Subsection 2.2 -->
+          <div id="icsab">
+            <h3 class="font-display text-2xl font-semibold text-slate-900 mb-8">2.2 O Índice de Internações por Condições Sensíveis à Atenção Básica (ICSAB)</h3>
+
+            <div class="insight-highlight rounded-lg p-6 mb-8">
+              <h4 class="font-semibold text-slate-900 mb-3">Meta Estadual vs Realidade</h4>
+              <div class="grid md:grid-cols-3 gap-6">
+                <div class="text-center">
+                  <div class="text-2xl font-bold text-green-600">20%</div>
+                  <div class="text-sm text-slate-600">Meta SESA 2025</div>
+                </div>
+                <div class="text-center">
+                  <div class="text-2xl font-bold text-red-600">28%</div>
+                  <div class="text-sm text-slate-600">Média Estadual Atual</div>
+                </div>
+                <div class="text-center">
+                  <div class="text-2xl font-bold text-red-600">42%</div>
+                  <div class="text-sm text-slate-600">Pedro Canário (pior caso)</div>
+                </div>
+              </div>
+              <p class="text-sm text-slate-600 mt-4">
+                <a class="citation" href="https://saude.es.gov.br/Media/sesa/Planejamento/PROGRAMA%C3%87%C3%83O%20ANUAL%20DE%20SA%C3%9ADE%20-%20PAS%202025%20-%20Aprovada%20CES%20Resolu%C3%A7%C3%A3o%201397_2025.pdf" target="_blank">
+                  Fonte: SESA/ES - PAS 2025 [SESA]
+                </a>
+              </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+              <div class="data-card">
+                <h4 class="font-semibold text-slate-900 mb-4">Municípios com ICSAB Crítico (&gt;30%)</h4>
+                <div class="space-y-2 text-sm">
+                  <div class="flex justify-between">
+                    <span>Pedro Canário</span>
+                    <span class="font-semibold text-red-600">42%</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span>Divino de São Lourenço</span>
+                    <span class="font-semibold text-red-600">42%</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span>João Neiva</span>
+                    <span class="font-semibold text-red-600">39%</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span>Guaçuí</span>
+                    <span class="font-semibold text-red-600">36%</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span>Santa Teresa</span>
+                    <span class="font-semibold text-red-600">35%</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="data-card">
+                <h4 class="font-semibold text-slate-900 mb-4">Correlação ICSAB × Taxa de Internação</h4>
+                <p class="text-sm text-slate-600 mb-4">
+                  Existe uma forte correlação positiva entre taxa de internação e ICSAB.
+                  Municípios com as maiores taxas de internação tendem a apresentar os ICSAB mais elevados.
+                </p>
+                <div class="text-xs text-slate-500">
+                  Isso demonstra que o investimento na atenção primária é a estratégia mais efetiva
+                  para reduzir as taxas de internação.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="section-divider"></div>
+
+      <!-- Section 3: Causas Subjacentes -->
+      <section class="py-16 px-8 bg-slate-50" id="causas-subjacentes">
+        <div class="container mx-auto max-w-6xl">
+          <div class="mb-12">
+            <h2 class="font-display text-3xl font-bold text-slate-900 mb-4">
+              3. Análise de Causas Subjacentes: Fatores Socioeconômicos e Ambientais
+            </h2>
+            <p class="text-lg text-slate-600 max-w-4xl">
+              A saúde de uma população não é determinada apenas pelo acesso aos serviços de saúde,
+              mas por um conjunto complexo de fatores, como renda, educação, saneamento, habitação e meio ambiente.
+            </p>
+          </div>
+
+          <!-- Subsection 3.1 -->
+          <div class="mb-16" id="fatores-socioeconomicos">
+            <h3 class="font-display text-2xl font-semibold text-slate-900 mb-8">3.1 O Caso de Pedro Canário: Desafios Ambientais e de Saneamento</h3>
+
+            <div class="grid lg:grid-cols-3 gap-8 mb-8">
+              <div class="lg:col-span-2">
+                <div class="data-card h-full">
+                  <h4 class="font-semibold text-slate-900 mb-4">Determinantes Sociais da Saúde</h4>
+                  <div class="space-y-4">
+                    <div class="border-l-4 border-red-500 pl-4">
+                      <h5 class="font-semibold text-slate-900">Saneamento Ambiental</h5>
+                      <p class="text-sm text-slate-600">
+                        <a class="citation" href="https://abes-dn.org.br/anaiseletronicos/32cbesa/987_tema_vii.pdf" target="_blank">
+                          Alta taxa de DRSAI (1.798/10.000 hab) [ABES]
+                        </a> - Principais causas: diarreia e dengue relacionadas à falta de esgotamento sanitário
+                      </p>
+                    </div>
+
+                    <div class="border-l-4 border-orange-500 pl-4">
+                      <h5 class="font-semibold text-slate-900">Desenvolvimento Humano</h5>
+                      <p class="text-sm text-slate-600">
+                        IDH de 0,654 (muito baixo) -
+                        <a class="citation" href="http://biblioteca.ijsn.es.gov.br/ConteudoDigital/20120829_ids_relatorio_2004.pdf" target="_blank">
+                          Expectativa de vida, educação e renda precárias [IJSN]
+                        </a>
+                      </p>
+                    </div>
+
+                    <div class="border-l-4 border-blue-500 pl-4">
+                      <h5 class="font-semibold text-slate-900">Demografia</h5>
+                      <p class="text-sm text-slate-600">
+                        <a class="citation" href="https://g1.globo.com/es/espirito-santo/noticia/2023/06/28/populacao-de-pedro-canario-es-e-de-21-522-pessoas-aponta-o-censo-do-ibge.ghtml" target="_blank">
+                          Declínio populacional de 9,55% desde 2010 [G1]
+                        </a> - Migração de jovens e trabalhadores
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="space-y-6">
+                <div class="data-card">
+                  <h4 class="font-semibold text-slate-900 mb-3">Santa Maria de Jetibá</h4>
+                  <ul class="text-sm text-slate-600 space-y-1">
+                    <li>• <strong>Barreira linguística</strong> (comunidade pomerana)</li>
+                    <li>• IDH: 0,671 (baixo)</li>
+                    <li>• Taxa de analfabetismo: 17,28%</li>
+                    <li>• <a class="citation" href="https://www.es.gov.br/Noticia/governo-do-estado-autoriza-ampliacao-do-hospital-evangelico-de-santa-maria-de-jetiba" target="_blank">
+                        Investimento de R$ 19,9 milhões em ampliação hospitalar [ES Gov]
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Subsection 3.2 -->
+          <div id="fatores-regionais">
+            <h3 class="font-display text-2xl font-semibold text-slate-900 mb-8">3.2 A Influência de Fatores Regionais</h3>
+
+            <div class="insight-highlight rounded-lg p-6 mb-8">
+              <h4 class="font-semibold text-slate-900 mb-3">Concentração Regional</h4>
+              <p class="text-slate-700 mb-4">
+                Há uma clara concentração de municípios com altas taxas de internação em determinadas regiões,
+                sugerindo a influência de fatores regionais que impactam a saúde da população.
+              </p>
+              <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                  <h5 class="font-semibold text-slate-900 mb-2">Região Norte</h5>
+                  <p class="text-sm text-slate-600">
+                    Uma das mais pobres do estado, com indicadores socioeconômicos desfavoráveis
+                    e infraestrutura de saúde precária.
+                  </p>
+                </div>
+                <div>
+                  <h5 class="font-semibold text-slate-900 mb-2">Região Metropolitana</h5>
+                  <p class="text-sm text-slate-600">
+                    Alta densidade populacional, segregação socioeconômica e desafios de acesso
+                    em bairros periféricos.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+<h4 class="font-semibold text-slate-900 mb-3">Vazio Assistencial no SUS na Região Norte do Espírito Santo: Um Desafio à Universalidade e Integralidade do Sistema</h4>
+<p class="text-slate-700 mb-4">
+Constata-se, com base em evidências epidemiológicas, indicadores de utilização de serviços e relatos de gestores e usuários, a existência de um vazio assistencial no âmbito do Sistema Único de Saúde (SUS) na região Norte do Espírito Santo. Esse vazio se expressa pela insuficiência de oferta de serviços de saúde resolutivos, especialmente em níveis de média e alta complexidade, dificuldades de acesso geográfico, dificuldades de profissionais, e fragilidades na regulação e integração entre os níveis de atenção.
+</p>
+<p class="text-slate-700 mb-4">
+A carência de unidades de referência, longas deslocações para atendimento especializado, filas de espera excessivas e a ausência de serviços de apoio diagnóstico e terapêutico configuram barreiras que comprometem o direito constitucional à saúde da população dessa região. Essa situação contraria os princípios do SUS — universalidade, equidade e integralidade — e agrava as desigualdades regionais já historicamente presentes no estado.
+</p>
+<p class="text-slate-700 mb-4">
+O vazio assistencial não se limita à ausência física de serviços, mas também à descontinuidade do cuidado, à falta de articulação entre os níveis de atenção e à baixa resolutividade da Atenção Primária , que deveria atuar como porta de entrada e ordenada da rede.
+</p>
+<div class="grid lg:grid-cols-2 gap-8">
+              <div class="data-card">
+		<div>
+                  <h5 class="font-semibold text-slate-900 mb-3">Para superar esse cenário, torna-se urgente:</h5>
+                  <ul class="text-sm text-slate-600 space-y-1">
+                    <li>• Fortalecer a regionalização da saúde com investimento em infraestrutura e recursos humanos;</li>
+                    <li>• Ampliar a oferta de serviços ambulatoriais e hospitalares de referência na própria região;</li>
+                    <li>• Implementar estratégias de telemedicina e telessaúde como paliativos enquanto não houver expansão física;</li>
+                    <li>• Garantir mecanismos de regulação e transporte sanitário;</li>
+                    <li>• Promover a participação social no monitoramento e controle da assistência.</li>
+                  </ul>
+                </div>
+</div>
+</div>
+<p class="text-slate-700 mb-4">
+<br>
+Somente com planejamento estratégico, a alocação equitativa de recursos e governança colaborativa será possível reduzir esse vazio assistencial e garantir o acesso digno e oportuno à saúde para a população do Norte capixaba.
+</p>
+          </div>
+        </div>
+      </section>
+
+      <div class="section-divider"></div>
+
+      <!-- Section 4: Implicações -->
+      <section class="py-16 px-8" id="implicacoes">
+        <div class="container mx-auto max-w-6xl">
+          <div class="mb-12">
+            <h2 class="font-display text-3xl font-bold text-slate-900 mb-4">
+              4. Implicações para o Planejamento e Alocação de Recursos
+            </h2>
+            <p class="text-lg text-slate-600 max-w-4xl">
+              Os desvios observados indicam a necessidade de uma revisão das estratégias de atuação do SUS no estado,
+              com foco no fortalecimento da atenção primária e na implementação de ações intersetoriais.
+            </p>
+          </div>
+
+          <!-- Subsection 4.1 -->
+          <div class="mb-16" id="planejamento">
+            <h3 class="font-display text-2xl font-semibold text-slate-900 mb-8">4.1 Priorização de Investimentos em Atenção Primária</h3>
+
+            <div class="grid lg:grid-cols-2 gap-8">
+              <div class="data-card">
+                <h4 class="font-semibold text-slate-900 mb-4">Estratégias Prioritárias</h4>
+                <ul class="space-y-3 text-sm text-slate-600">
+                  <li class="flex items-start">
+                    <i class="fas fa-users text-blue-500 mr-3 mt-1"></i>
+                    <div>
+                      <strong>Ampliação da ESF</strong> - Expandir a cobertura da Estratégia Saúde da Família
+                      em municípios com alto ICSAB
+                    </div>
+                  </li>
+                  <li class="flex items-start">
+                    <i class="fas fa-graduation-cap text-green-500 mr-3 mt-1"></i>
+                    <div>
+                      <strong>Capacitação profissional</strong> - Qualificar profissionais para lidar com
+                      as principais condições de saúde da população
+                    </div>
+                  </li>
+                  <li class="flex items-start">
+                    <i class="fas fa-clinic-medical text-purple-500 mr-3 mt-1"></i>
+                    <div>
+                      <strong>Infraestrutura de UBS</strong> - Construção e reforma de Unidades Básicas
+                      de Saúde em áreas críticas
+                    </div>
+                  </li>
+                  <li class="flex items-start">
+                    <i class="fas fa-heart text-red-500 mr-3 mt-1"></i>
+                    <div>
+                      <strong>Programas de prevenção</strong> - Educação em saúde e promoção de
+                      hábitos saudáveis adaptados às realidades locais
+                    </div>
+                  </li>
+                </ul>
+              </div>
+
+              <div class="data-card">
+                <h4 class="font-semibold text-slate-900 mb-4">Municípios Prioritários</h4>
+                <div class="space-y-3">
+                  <div class="p-3 bg-red-50 rounded-lg border-l-4 border-red-500">
+                    <div class="font-semibold text-slate-900">Prioridade Máxima (ICSAB &gt;35%)</div>
+                    <div class="text-sm text-slate-600">Pedro Canário, Divino de São Lourenço, João Neiva</div>
+                  </div>
+                  <div class="p-3 bg-orange-50 rounded-lg border-l-4 border-orange-500">
+                    <div class="font-semibold text-slate-900">Prioridade Alta (ICSAB &gt;30%)</div>
+                    <div class="text-sm text-slate-600">Santa Teresa, Guaçuí, Santa Maria de Jetibá</div>
+                  </div>
+                  <div class="p-3 bg-yellow-50 rounded-lg border-l-4 border-yellow-500">
+                    <div class="font-semibold text-slate-900">Prioridade Média (ICSAB &gt;25%)</div>
+                    <div class="text-sm text-slate-600">Demais municípios acima da meta estadual</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Subsection 4.2 -->
+          <div id="alocacao-recursos">
+            <h3 class="font-display text-2xl font-semibold text-slate-900 mb-8">4.2 A Importância de Ações Intersetoriais</h3>
+
+            <div class="insight-highlight rounded-lg p-8 mb-8">
+              <h4 class="font-semibold text-slate-900 mb-4">Abordagem Integrada</h4>
+              <p class="text-slate-700 mb-6">
+                A redução das taxas de internação e a melhoria da saúde da população requerem a implementação
+                de ações intersetoriais, envolvendo a articulação entre políticas de saúde, educação, saneamento,
+                meio ambiente e outras áreas.
+              </p>
+
+              <div class="grid md:grid-cols-3 gap-6">
+                <div class="text-center">
+                  <i class="fas fa-tint text-blue-500 text-2xl mb-3"></i>
+                  <h5 class="font-semibold text-slate-900 mb-2">Saneamento Básico</h5>
+                  <p class="text-sm text-slate-600">Investimento em redes de esgoto e água tratada</p>
+                </div>
+                <div class="text-center">
+                  <i class="fas fa-graduation-cap text-green-500 text-2xl mb-3"></i>
+                  <h5 class="font-semibold text-slate-900 mb-2">Educação em Saúde</h5>
+                  <p class="text-sm text-slate-600">Programas de alfabetização e conscientização</p>
+                </div>
+                <div class="text-center">
+                  <i class="fas fa-briefcase text-purple-500 text-2xl mb-3"></i>
+                  <h5 class="font-semibold text-slate-900 mb-2">Geração de Renda</h5>
+                  <p class="text-sm text-slate-600">Ações de emprego e desenvolvimento econômico</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="data-card">
+              <h4 class="font-semibold text-slate-900 mb-4">Monitoramento e Avaliação Contínua</h4>
+              <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                  <h5 class="font-semibold text-slate-900 mb-3">Indicadores-Chave</h5>
+                  <ul class="text-sm text-slate-600 space-y-1">
+                    <li>• Taxa de internação (meta: 6-8%)</li>
+                    <li>• ICSAB (meta: &lt;20% até 2025)</li>
+                    <li>• Distribuição por complexidade</li>
+                    <li>• Cobertura da ESF</li>
+                  </ul>
+                </div>
+                <div>
+                  <h5 class="font-semibold text-slate-900 mb-3">Ações Estratégicas</h5>
+                  <ul class="text-sm text-slate-600 space-y-1">
+                    <li>• Acompanhamento trimestral dos indicadores</li>
+                    <li>• Replanejamento baseado em evidências</li>
+                    <li>• Participação comunitária no planejamento</li>
+                    <li>• Integração de sistemas de informação</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+<!-- Subsection 4.2 -->
+<div id="tabela-de-dados">
+<h2>4. Tabela Completa de Dados - Internações por Município</h2>
+        <p><em>Legenda das cores:</em></p>
+        <ul>
+            <li><span style="background-color: #fecaca; padding: 2px 5px;">Taxa de internação > 8%</span></li>
+            <li><span style="background-color: #bbf7d0; padding: 2px 5px;">Taxa de internação < 6%</span></li>
+            <li><span style="background-color: #fed7d7; padding: 2px 5px;">ICSAB > 30%</span></li>
+            <li><span style="background-color: #d1fae5; padding: 2px 5px;">ICSAB < 20%</span></li>
+        </ul>
+
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Município</th>
+                        <th>Internações Média Complexidade</th>
+                        <th>Internações Alta Complexidade</th>
+                        <th>Total Internações</th>
+                        <th>População 2022</th>
+                        <th>% Internação População</th>
+                        <th>% Média Complexidade</th>
+                        <th>% Alta Complexidade</th>
+                        <th>ICSAB</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Afonso Cláudio</td>
+                        <td>1.525</td>
+                        <td>182</td>
+                        <td>1.707</td>
+                        <td>30.684</td>
+                        <td class="high-rate">11,10%</td>
+                        <td>89,30%</td>
+                        <td>10,70%</td>
+                        <td class="high-icsab">27%</td>
+                    </tr>
+                    <tr>
+                        <td>Água Doce do Norte</td>
+                        <td>195</td>
+                        <td>39</td>
+                        <td>234</td>
+                        <td>12.042</td>
+                        <td class="low-rate">3,90%</td>
+                        <td>83,30%</td>
+                        <td>16,70%</td>
+                        <td class="low-icsab">13%</td>
+                    </tr>
+                    <tr>
+                        <td>Águia Branca</td>
+                        <td>215</td>
+                        <td>44</td>
+                        <td>259</td>
+                        <td>9.711</td>
+                        <td class="medium-rate">5,30%</td>
+                        <td>83,00%</td>
+                        <td>17,00%</td>
+                        <td class="medium-rate">21%</td>
+                    </tr>
+                    <tr>
+                        <td>Alegre</td>
+                        <td>1.254</td>
+                        <td>99</td>
+                        <td>1.353</td>
+                        <td>29.177</td>
+                        <td class="high-rate">9,30%</td>
+                        <td>92,70%</td>
+                        <td>7,30%</td>
+                        <td class="high-icsab">35%</td>
+                    </tr>
+                    <tr>
+                        <td>Alfredo Chaves</td>
+                        <td>481</td>
+                        <td>81</td>
+                        <td>562</td>
+                        <td>13.836</td>
+                        <td class="medium-rate">8,10%</td>
+                        <td>85,60%</td>
+                        <td>14,40%</td>
+                        <td class="high-icsab">23%</td>
+                    </tr>
+                    <tr>
+                        <td>Alto Rio Novo</td>
+                        <td>263</td>
+                        <td>44</td>
+                        <td>307</td>
+                        <td>7.434</td>
+                        <td class="high-rate">8,30%</td>
+                        <td>85,70%</td>
+                        <td>14,30%</td>
+                        <td class="medium-rate">18%</td>
+                    </tr>
+                    <tr>
+                        <td>Anchieta</td>
+                        <td>1.032</td>
+                        <td>104</td>
+                        <td>1.136</td>
+                        <td>29.984</td>
+                        <td class="medium-rate">7,60%</td>
+                        <td>90,80%</td>
+                        <td>9,20%</td>
+                        <td class="high-icsab">24%</td>
+                    </tr>
+                    <tr>
+                        <td>Apiacá</td>
+                        <td>235</td>
+                        <td>20</td>
+                        <td>255</td>
+                        <td>7.223</td>
+                        <td class="medium-rate">7,10%</td>
+                        <td>92,20%</td>
+                        <td>7,80%</td>
+                        <td class="high-icsab">26%</td>
+                    </tr>
+                    <tr>
+                        <td>Aracruz</td>
+                        <td>3.535</td>
+                        <td>297</td>
+                        <td>3.832</td>
+                        <td>94.765</td>
+                        <td class="medium-rate">8,10%</td>
+                        <td>92,20%</td>
+                        <td>7,80%</td>
+                        <td class="high-icsab">27%</td>
+                    </tr>
+                    <tr>
+                        <td>Atílio Vivacqua</td>
+                        <td>467</td>
+                        <td>28</td>
+                        <td>495</td>
+                        <td>10.540</td>
+                        <td class="high-rate">9,40%</td>
+                        <td>94,30%</td>
+                        <td>5,70%</td>
+                        <td class="high-icsab">30%</td>
+                    </tr>
+                    <tr>
+                        <td>Baixo Guandu</td>
+                        <td>1.368</td>
+                        <td>124</td>
+                        <td>1.492</td>
+                        <td>30.674</td>
+                        <td class="high-rate">9,70%</td>
+                        <td>91,70%</td>
+                        <td>8,30%</td>
+                        <td class="high-icsab">30%</td>
+                    </tr>
+                    <tr>
+                        <td>Barra de São Francisco</td>
+                        <td>676</td>
+                        <td>147</td>
+                        <td>823</td>
+                        <td>42.498</td>
+                        <td class="low-rate">3,90%</td>
+                        <td>82,10%</td>
+                        <td>17,90%</td>
+                        <td class="medium-rate">21%</td>
+                    </tr>
+                    <tr>
+                        <td>Boa Esperança</td>
+                        <td>737</td>
+                        <td>48</td>
+                        <td>785</td>
+                        <td>13.608</td>
+                        <td class="high-rate">11,50%</td>
+                        <td>93,90%</td>
+                        <td>6,10%</td>
+                        <td class="high-icsab">30%</td>
+                    </tr>
+                    <tr>
+                        <td>Bom Jesus do Norte</td>
+                        <td>250</td>
+                        <td>16</td>
+                        <td>266</td>
+                        <td>10.254</td>
+                        <td class="medium-rate">5,20%</td>
+                        <td>94,00%</td>
+                        <td>6,00%</td>
+                        <td class="high-icsab">34%</td>
+                    </tr>
+                    <tr>
+                        <td>Brejetuba</td>
+                        <td>524</td>
+                        <td>38</td>
+                        <td>562</td>
+                        <td>12.985</td>
+                        <td class="high-rate">8,70%</td>
+                        <td>93,20%</td>
+                        <td>6,80%</td>
+                        <td class="high-icsab">27%</td>
+                    </tr>
+                    <tr>
+                        <td>Cachoeiro de Itapemirim</td>
+                        <td>7.274</td>
+                        <td>705</td>
+                        <td>7.979</td>
+                        <td>185.784</td>
+                        <td class="medium-rate">8,60%</td>
+                        <td>91,20%</td>
+                        <td>8,80%</td>
+                        <td class="high-icsab">30%</td>
+                    </tr>
+                    <tr>
+                        <td>Cariacica</td>
+                        <td>12.874</td>
+                        <td>1.349</td>
+                        <td>14.223</td>
+                        <td>353.510</td>
+                        <td class="medium-rate">8,00%</td>
+                        <td>90,50%</td>
+                        <td>9,50%</td>
+                        <td class="high-icsab">28%</td>
+                    </tr>
+                    <tr>
+                        <td>Castelo</td>
+                        <td>1.457</td>
+                        <td>135</td>
+                        <td>1.592</td>
+                        <td>36.930</td>
+                        <td class="medium-rate">8,60%</td>
+                        <td>91,50%</td>
+                        <td>8,50%</td>
+                        <td class="high-icsab">26%</td>
+                    </tr>
+                    <tr>
+                        <td>Colatina</td>
+                        <td>5.306</td>
+                        <td>587</td>
+                        <td>5.893</td>
+                        <td>119.992</td>
+                        <td class="high-rate">9,80%</td>
+                        <td>90,00%</td>
+                        <td>10,00%</td>
+                        <td class="medium-rate">21%</td>
+                    </tr>
+                    <tr>
+                        <td>Conceição da Barra</td>
+                        <td>1.043</td>
+                        <td>100</td>
+                        <td>1.143</td>
+                        <td>27.458</td>
+                        <td class="medium-rate">8,30%</td>
+                        <td>91,30%</td>
+                        <td>8,70%</td>
+                        <td class="medium-rate">22%</td>
+                    </tr>
+                    <tr>
+                        <td>Conceição do Castelo</td>
+                        <td>440</td>
+                        <td>35</td>
+                        <td>475</td>
+                        <td>11.937</td>
+                        <td class="medium-rate">8,00%</td>
+                        <td>92,60%</td>
+                        <td>7,40%</td>
+                        <td class="high-icsab">26%</td>
+                    </tr>
+                    <tr>
+                        <td>Divino de São Lourenço</td>
+                        <td>166</td>
+                        <td>9</td>
+                        <td>175</td>
+                        <td>5.083</td>
+                        <td class="medium-rate">6,90%</td>
+                        <td>94,90%</td>
+                        <td>5,10%</td>
+                        <td class="high-icsab">42%</td>
+                    </tr>
+                    <tr>
+                        <td>Domingos Martins</td>
+                        <td>1.853</td>
+                        <td>209</td>
+                        <td>2.062</td>
+                        <td>35.416</td>
+                        <td class="high-rate">11,60%</td>
+                        <td>89,90%</td>
+                        <td>10,10%</td>
+                        <td class="medium-rate">21%</td>
+                    </tr>
+                    <tr>
+                        <td>Dores do Rio Preto</td>
+                        <td>235</td>
+                        <td>16</td>
+                        <td>251</td>
+                        <td>6.596</td>
+                        <td class="medium-rate">7,60%</td>
+                        <td>93,60%</td>
+                        <td>6,40%</td>
+                        <td class="high-icsab">34%</td>
+                    </tr>
+                    <tr>
+                        <td>Ecoporanga</td>
+                        <td>439</td>
+                        <td>85</td>
+                        <td>524</td>
+                        <td>21.992</td>
+                        <td class="low-rate">4,80%</td>
+                        <td>83,80%</td>
+                        <td>16,20%</td>
+                        <td class="low-icsab">16%</td>
+                    </tr>
+                    <tr>
+                        <td>Fundão</td>
+                        <td>650</td>
+                        <td>80</td>
+                        <td>730</td>
+                        <td>18.014</td>
+                        <td class="medium-rate">8,10%</td>
+                        <td>89,00%</td>
+                        <td>11,00%</td>
+                        <td class="high-icsab">34%</td>
+                    </tr>
+                    <tr>
+                        <td>Governador Lindenberg</td>
+                        <td>438</td>
+                        <td>58</td>
+                        <td>496</td>
+                        <td>11.009</td>
+                        <td class="high-rate">9,00%</td>
+                        <td>88,30%</td>
+                        <td>11,70%</td>
+                        <td class="medium-rate">19%</td>
+                    </tr>
+                    <tr>
+                        <td>Guaçuí</td>
+                        <td>1.251</td>
+                        <td>110</td>
+                        <td>1.361</td>
+                        <td>29.358</td>
+                        <td class="high-rate">9,30%</td>
+                        <td>91,90%</td>
+                        <td>8,10%</td>
+                        <td class="high-icsab">36%</td>
+                    </tr>
+                    <tr>
+                        <td>Guarapari</td>
+                        <td>4.363</td>
+                        <td>464</td>
+                        <td>4.827</td>
+                        <td>124.656</td>
+                        <td class="medium-rate">7,70%</td>
+                        <td>90,40%</td>
+                        <td>9,60%</td>
+                        <td class="high-icsab">31%</td>
+                    </tr>
+                    <tr>
+                        <td>Ibatiba</td>
+                        <td>918</td>
+                        <td>91</td>
+                        <td>1.009</td>
+                        <td>25.380</td>
+                        <td class="medium-rate">8,00%</td>
+                        <td>91,00%</td>
+                        <td>9,00%</td>
+                        <td class="high-icsab">27%</td>
+                    </tr>
+                    <tr>
+                        <td>Ibiraçu</td>
+                        <td>245</td>
+                        <td>46</td>
+                        <td>291</td>
+                        <td>11.713</td>
+                        <td class="low-rate">5,00%</td>
+                        <td>84,20%</td>
+                        <td>15,80%</td>
+                        <td class="high-icsab">27%</td>
+                    </tr>
+                    <tr>
+                        <td>Ibitirama</td>
+                        <td>335</td>
+                        <td>29</td>
+                        <td>364</td>
+                        <td>9.520</td>
+                        <td class="medium-rate">7,60%</td>
+                        <td>92,00%</td>
+                        <td>8,00%</td>
+                        <td class="medium-rate">20%</td>
+                    </tr>
+                    <tr>
+                        <td>Iconha</td>
+                        <td>421</td>
+                        <td>51</td>
+                        <td>472</td>
+                        <td>12.326</td>
+                        <td class="medium-rate">7,70%</td>
+                        <td>89,20%</td>
+                        <td>10,80%</td>
+                        <td class="medium-rate">19%</td>
+                    </tr>
+                    <tr>
+                        <td>Irupi</td>
+                        <td>375</td>
+                        <td>43</td>
+                        <td>418</td>
+                        <td>13.710</td>
+                        <td class="medium-rate">6,10%</td>
+                        <td>89,70%</td>
+                        <td>10,30%</td>
+                        <td class="medium-rate">22%</td>
+                    </tr>
+                    <tr>
+                        <td>Itaguaçu</td>
+                        <td>476</td>
+                        <td>141</td>
+                        <td>617</td>
+                        <td>13.589</td>
+                        <td class="high-rate">9,10%</td>
+                        <td>77,10%</td>
+                        <td>22,90%</td>
+                        <td class="high-icsab">26%</td>
+                    </tr>
+                    <tr>
+                        <td>Itapemirim</td>
+                        <td>1.784</td>
+                        <td>141</td>
+                        <td>1.925</td>
+                        <td>39.832</td>
+                        <td class="high-rate">9,70%</td>
+                        <td>92,70%</td>
+                        <td>7,30%</td>
+                        <td class="medium-rate">25%</td>
+                    </tr>
+                    <tr>
+                        <td>Itarana</td>
+                        <td>588</td>
+                        <td>58</td>
+                        <td>646</td>
+                        <td>10.597</td>
+                        <td class="high-rate">12,20%</td>
+                        <td>91,00%</td>
+                        <td>9,00%</td>
+                        <td class="high-icsab">27%</td>
+                    </tr>
+                    <tr>
+                        <td>Iúna</td>
+                        <td>968</td>
+                        <td>77</td>
+                        <td>1.045</td>
+                        <td>28.590</td>
+                        <td class="medium-rate">7,30%</td>
+                        <td>92,60%</td>
+                        <td>7,40%</td>
+                        <td class="high-icsab">35%</td>
+                    </tr>
+                    <tr>
+                        <td>Jaguaré</td>
+                        <td>1.195</td>
+                        <td>102</td>
+                        <td>1.297</td>
+                        <td>28.931</td>
+                        <td class="high-rate">9,00%</td>
+                        <td>92,10%</td>
+                        <td>7,90%</td>
+                        <td class="medium-rate">23%</td>
+                    </tr>
+                    <tr>
+                        <td>Jerônimo Monteiro</td>
+                        <td>613</td>
+                        <td>46</td>
+                        <td>659</td>
+                        <td>11.575</td>
+                        <td class="high-rate">11,40%</td>
+                        <td>93,00%</td>
+                        <td>7,00%</td>
+                        <td class="high-icsab">33%</td>
+                    </tr>
+                    <tr>
+                        <td>João Neiva</td>
+                        <td>466</td>
+                        <td>63</td>
+                        <td>529</td>
+                        <td>14.079</td>
+                        <td class="medium-rate">7,50%</td>
+                        <td>88,10%</td>
+                        <td>11,90%</td>
+                        <td class="high-icsab">39%</td>
+                    </tr>
+                    <tr>
+                        <td>Laranja da Terra</td>
+                        <td>477</td>
+                        <td>53</td>
+                        <td>530</td>
+                        <td>11.094</td>
+                        <td class="high-rate">9,60%</td>
+                        <td>90,00%</td>
+                        <td>10,00%</td>
+                        <td class="high-icsab">34%</td>
+                    </tr>
+                    <tr>
+                        <td>Linhares</td>
+                        <td>6.772</td>
+                        <td>635</td>
+                        <td>7.407</td>
+                        <td>166.786</td>
+                        <td class="high-rate">8,90%</td>
+                        <td>91,40%</td>
+                        <td>8,60%</td>
+                        <td class="high-icsab">27%</td>
+                    </tr>
+                    <tr>
+                        <td>Mantenópolis</td>
+                        <td>233</td>
+                        <td>75</td>
+                        <td>308</td>
+                        <td>12.770</td>
+                        <td class="low-rate">4,80%</td>
+                        <td>75,60%</td>
+                        <td>24,40%</td>
+                        <td class="low-icsab">15%</td>
+                    </tr>
+                    <tr>
+                        <td>Marataizes</td>
+                        <td>1.797</td>
+                        <td>170</td>
+                        <td>1.967</td>
+                        <td>41.929</td>
+                        <td class="high-rate">9,40%</td>
+                        <td>91,40%</td>
+                        <td>8,60%</td>
+                        <td class="medium-rate">25%</td>
+                    </tr>
+                    <tr>
+                        <td>Marechal Floriano</td>
+                        <td>854</td>
+                        <td>94</td>
+                        <td>948</td>
+                        <td>17.641</td>
+                        <td class="high-rate">10,70%</td>
+                        <td>90,10%</td>
+                        <td>9,90%</td>
+                        <td class="medium-rate">19%</td>
+                    </tr>
+                    <tr>
+                        <td>Marilândia</td>
+                        <td>532</td>
+                        <td>90</td>
+                        <td>622</td>
+                        <td>12.202</td>
+                        <td class="high-rate">10,20%</td>
+                        <td>85,50%</td>
+                        <td>14,50%</td>
+                        <td class="medium-rate">22%</td>
+                    </tr>
+                    <tr>
+                        <td>Mimoso do Sul</td>
+                        <td>855</td>
+                        <td>82</td>
+                        <td>937</td>
+                        <td>24.475</td>
+                        <td class="medium-rate">7,70%</td>
+                        <td>91,20%</td>
+                        <td>8,80%</td>
+                        <td class="high-icsab">28%</td>
+                    </tr>
+                    <tr>
+                        <td>Montanha</td>
+                        <td>823</td>
+                        <td>67</td>
+                        <td>890</td>
+                        <td>18.900</td>
+                        <td class="high-rate">9,40%</td>
+                        <td>92,50%</td>
+                        <td>7,50%</td>
+                        <td class="medium-rate">20%</td>
+                    </tr>
+                    <tr>
+                        <td>Mucurici</td>
+                        <td>305</td>
+                        <td>37</td>
+                        <td>342</td>
+                        <td>5.466</td>
+                        <td class="high-rate">12,50%</td>
+                        <td>89,20%</td>
+                        <td>10,80%</td>
+                        <td class="medium-rate">23%</td>
+                    </tr>
+                    <tr>
+                        <td>Muniz Freire</td>
+                        <td>691</td>
+                        <td>55</td>
+                        <td>746</td>
+                        <td>18.153</td>
+                        <td class="medium-rate">8,20%</td>
+                        <td>92,60%</td>
+                        <td>7,40%</td>
+                        <td class="high-icsab">26%</td>
+                    </tr>
+                    <tr>
+                        <td>Muqui</td>
+                        <td>497</td>
+                        <td>46</td>
+                        <td>543</td>
+                        <td>13.745</td>
+                        <td class="medium-rate">7,90%</td>
+                        <td>91,50%</td>
+                        <td>8,50%</td>
+                        <td class="high-icsab">28%</td>
+                    </tr>
+                    <tr>
+                        <td>Nova Venécia</td>
+                        <td>2.214</td>
+                        <td>209</td>
+                        <td>2.423</td>
+                        <td>49.065</td>
+                        <td class="high-rate">9,90%</td>
+                        <td>91,40%</td>
+                        <td>8,60%</td>
+                        <td class="high-icsab">28%</td>
+                    </tr>
+                    <tr>
+                        <td>Pancas</td>
+                        <td>769</td>
+                        <td>91</td>
+                        <td>860</td>
+                        <td>18.893</td>
+                        <td class="high-rate">9,10%</td>
+                        <td>89,40%</td>
+                        <td>10,60%</td>
+                        <td class="medium-rate">24%</td>
+                    </tr>
+                    <tr>
+                        <td>Pedro Canário</td>
+                        <td>1.339</td>
+                        <td>69</td>
+                        <td>1.408</td>
+                        <td>21.522</td>
+                        <td class="high-rate">13,10%</td>
+                        <td>95,10%</td>
+                        <td>4,90%</td>
+                        <td class="high-icsab">42%</td>
+                    </tr>
+                    <tr>
+                        <td>Pinheiros</td>
+                        <td>1.109</td>
+                        <td>82</td>
+                        <td>1.191</td>
+                        <td>23.915</td>
+                        <td class="high-rate">10,00%</td>
+                        <td>93,10%</td>
+                        <td>6,90%</td>
+                        <td class="high-icsab">30%</td>
+                    </tr>
+                    <tr>
+                        <td>Piúma</td>
+                        <td>841</td>
+                        <td>74</td>
+                        <td>915</td>
+                        <td>22.300</td>
+                        <td class="medium-rate">8,20%</td>
+                        <td>91,90%</td>
+                        <td>8,10%</td>
+                        <td class="medium-rate">23%</td>
+                    </tr>
+                    <tr>
+                        <td>Ponto Belo</td>
+                        <td>212</td>
+                        <td>18</td>
+                        <td>230</td>
+                        <td>6.497</td>
+                        <td class="medium-rate">7,10%</td>
+                        <td>92,20%</td>
+                        <td>7,80%</td>
+                        <td class="medium-rate">25%</td>
+                    </tr>
+                    <tr>
+                        <td>Presidente Kennedy</td>
+                        <td>699</td>
+                        <td>54</td>
+                        <td>753</td>
+                        <td>13.696</td>
+                        <td class="high-rate">11,00%</td>
+                        <td>92,80%</td>
+                        <td>7,20%</td>
+                        <td class="medium-rate">21%</td>
+                    </tr>
+                    <tr>
+                        <td>Rio Bananal</td>
+                        <td>656</td>
+                        <td>87</td>
+                        <td>743</td>
+                        <td>19.273</td>
+                        <td class="medium-rate">7,70%</td>
+                        <td>88,30%</td>
+                        <td>11,70%</td>
+                        <td class="medium-rate">18%</td>
+                    </tr>
+                    <tr>
+                        <td>Rio Novo do Sul</td>
+                        <td>445</td>
+                        <td>57</td>
+                        <td>502</td>
+                        <td>11.069</td>
+                        <td class="high-rate">9,10%</td>
+                        <td>88,60%</td>
+                        <td>11,40%</td>
+                        <td class="high-icsab">26%</td>
+                    </tr>
+                    <tr>
+                        <td>Santa Leopoldina</td>
+                        <td>497</td>
+                        <td>53</td>
+                        <td>550</td>
+                        <td>13.106</td>
+                        <td class="medium-rate">8,40%</td>
+                        <td>90,40%</td>
+                        <td>9,60%</td>
+                        <td class="medium-rate">24%</td>
+                    </tr>
+                    <tr>
+                        <td>Santa Maria de Jetibá</td>
+                        <td>2.447</td>
+                        <td>195</td>
+                        <td>2.642</td>
+                        <td>41.636</td>
+                        <td class="high-rate">12,70%</td>
+                        <td>92,60%</td>
+                        <td>7,40%</td>
+                        <td class="high-icsab">33%</td>
+                    </tr>
+                    <tr>
+                        <td>Santa Teresa</td>
+                        <td>1.359</td>
+                        <td>98</td>
+                        <td>1.457</td>
+                        <td>22.808</td>
+                        <td class="high-rate">12,80%</td>
+                        <td>93,30%</td>
+                        <td>6,70%</td>
+                        <td class="high-icsab">35%</td>
+                    </tr>
+                    <tr>
+                        <td>São Domingos do Norte</td>
+                        <td>351</td>
+                        <td>57</td>
+                        <td>408</td>
+                        <td>8.589</td>
+                        <td class="high-rate">9,50%</td>
+                        <td>86,00%</td>
+                        <td>14,00%</td>
+                        <td class="medium-rate">22%</td>
+                    </tr>
+                    <tr>
+                        <td>São Gabriel da Palha</td>
+                        <td>1.092</td>
+                        <td>148</td>
+                        <td>1.240</td>
+                        <td>32.252</td>
+                        <td class="medium-rate">7,70%</td>
+                        <td>88,10%</td>
+                        <td>11,90%</td>
+                        <td class="medium-rate">25%</td>
+                    </tr>
+                    <tr>
+                        <td>São José do Calçado</td>
+                        <td>602</td>
+                        <td>28</td>
+                        <td>630</td>
+                        <td>10.878</td>
+                        <td class="high-rate">11,60%</td>
+                        <td>95,60%</td>
+                        <td>4,40%</td>
+                        <td class="high-icsab">33%</td>
+                    </tr>
+                    <tr>
+                        <td>São Mateus</td>
+                        <td>5.047</td>
+                        <td>352</td>
+                        <td>5.399</td>
+                        <td>123.750</td>
+                        <td class="high-rate">8,70%</td>
+                        <td>93,50%</td>
+                        <td>6,50%</td>
+                        <td class="medium-rate">26%</td>
+                    </tr>
+                    <tr>
+                        <td>São Roque do Canaã</td>
+                        <td>478</td>
+                        <td>68</td>
+                        <td>546</td>
+                        <td>10.886</td>
+                        <td class="high-rate">10,00%</td>
+                        <td>87,50%</td>
+                        <td>12,50%</td>
+                        <td class="medium-rate">18%</td>
+                    </tr>
+                    <tr>
+                        <td>Serra</td>
+                        <td>15.919</td>
+                        <td>1.712</td>
+                        <td>17.631</td>
+                        <td>520.649</td>
+                        <td class="medium-rate">6,80%</td>
+                        <td>90,30%</td>
+                        <td>9,70%</td>
+                        <td class="high-icsab">30%</td>
+                    </tr>
+                    <tr>
+                        <td>Sooretama</td>
+                        <td>863</td>
+                        <td>106</td>
+                        <td>969</td>
+                        <td>26.502</td>
+                        <td class="medium-rate">7,30%</td>
+                        <td>89,10%</td>
+                        <td>10,90%</td>
+                        <td class="medium-rate">23%</td>
+                    </tr>
+                    <tr>
+                        <td>Vargem Alta</td>
+                        <td>1.059</td>
+                        <td>84</td>
+                        <td>1.143</td>
+                        <td>19.563</td>
+                        <td class="high-rate">11,70%</td>
+                        <td>92,70%</td>
+                        <td>7,30%</td>
+                        <td class="high-icsab">27%</td>
+                    </tr>
+                    <tr>
+                        <td>Venda Nova do Imigrante</td>
+                        <td>1.047</td>
+                        <td>86</td>
+                        <td>1.133</td>
+                        <td>23.831</td>
+                        <td class="high-rate">9,50%</td>
+                        <td>92,40%</td>
+                        <td>7,60%</td>
+                        <td class="high-icsab">26%</td>
+                    </tr>
+                    <tr>
+                        <td>Viana</td>
+                        <td>2.820</td>
+                        <td>293</td>
+                        <td>3.113</td>
+                        <td>73.423</td>
+                        <td class="medium-rate">8,50%</td>
+                        <td>90,60%</td>
+                        <td>9,40%</td>
+                        <td class="high-icsab">28%</td>
+                    </tr>
+                    <tr>
+                        <td>Vila Pavão</td>
+                        <td>269</td>
+                        <td>46</td>
+                        <td>315</td>
+                        <td>8.911</td>
+                        <td class="medium-rate">7,10%</td>
+                        <td>85,40%</td>
+                        <td>14,60%</td>
+                        <td class="medium-rate">25%</td>
+                    </tr>
+                    <tr>
+                        <td>Vila Valério</td>
+                        <td>593</td>
+                        <td>48</td>
+                        <td>641</td>
+                        <td>13.728</td>
+                        <td class="high-rate">9,30%</td>
+                        <td>92,50%</td>
+                        <td>7,50%</td>
+                        <td class="high-icsab">27%</td>
+                    </tr>
+                    <tr>
+                        <td>Vila Velha</td>
+                        <td>14.314</td>
+                        <td>1.413</td>
+                        <td>15.727</td>
+                        <td>467.722</td>
+                        <td class="medium-rate">6,70%</td>
+                        <td>91,00%</td>
+                        <td>9,00%</td>
+                        <td class="high-icsab">30%</td>
+                    </tr>
+                    <tr>
+                        <td>Vitória</td>
+                        <td>8.740</td>
+                        <td>1.073</td>
+                        <td>9.813</td>
+                        <td>322.869</td>
+                        <td class="medium-rate">6,10%</td>
+                        <td>89,10%</td>
+                        <td>10,90%</td>
+                        <td class="high-icsab">27%</td>
+                    </tr>
+                    <tr style="font-weight: bold; background-color: #f0f9ff;">
+                        <td>TOTAL ESTADUAL</td>
+                        <td>138.547</td>
+                        <td>14.146</td>
+                        <td>152.693</td>
+                        <td>3.833.486</td>
+                        <td>8,00%</td>
+                        <td>90,70%</td>
+                        <td>9,30%</td>
+                        <td>28%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+      
+    <!-- Mobile Menu Toggle -->
+    <button class="lg:hidden fixed top-4 left-4 z-50 bg-white p-2 rounded-lg shadow-lg" id="mobile-menu-toggle">
+      <i class="fas fa-bars text-slate-900"></i>
+    </button>
+
+    <script>
+        // Mobile menu toggle
+        const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+        const tocSidebar = document.querySelector('.toc-sidebar');
+        
+        mobileMenuToggle.addEventListener('click', () => {
+            tocSidebar.classList.toggle('open');
+        });
+
+        // Active TOC link highlighting
+        const tocLinks = document.querySelectorAll('.toc-link');
+        const sections = document.querySelectorAll('section, div[id]');
+
+        function updateActiveLink() {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - 100;
+                if (window.pageYOffset >= sectionTop) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            tocLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        }
+
+        window.addEventListener('scroll', updateActiveLink);
+        updateActiveLink();
+
+        // Smooth scrolling for TOC links
+        tocLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('href').substring(1);
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+                
+                // Close mobile menu if open
+                if (tocSidebar.classList.contains('open')) {
+                    tocSidebar.classList.remove('open');
+                }
+            });
+        });
+    </script>
+
+  </body>
+
+
+      
+
+      <!-- Footer -->
+      <footer class="py-12 px-8 bg-slate-900 text-white">
+        <div class="container mx-auto max-w-4xl">
+          <div class="text-center">
+            <h3 class="font-display text-xl font-semibold mb-4">Relatório de Análise de Internações Hospitalares</h3>
+            <p class="text-slate-300 mb-6">
+              Baseado em dados oficiais do Sistema Único de Saúde e órgãos governamentais do Espírito Santo
+            </p>
+            <div class="text-sm text-slate-400">
+              <p> 2025 - Análise para fins de planejamento em saúde pública</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </main>
+
+    <!-- Mobile Menu Toggle -->
+    <button class="lg:hidden fixed top-4 left-4 z-50 bg-white p-2 rounded-lg shadow-lg" id="mobile-menu-toggle">
+      <i class="fas fa-bars text-slate-900"></i>
+    </button>
+
+    <script>
+        // Mobile menu toggle
+        const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+        const tocSidebar = document.querySelector('.toc-sidebar');
+        
+        mobileMenuToggle.addEventListener('click', () => {
+            tocSidebar.classList.toggle('open');
+        });
+
+        // Active TOC link highlighting
+        const tocLinks = document.querySelectorAll('.toc-link');
+        const sections = document.querySelectorAll('section, div[id]');
+
+        function updateActiveLink() {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - 100;
+                if (window.pageYOffset >= sectionTop) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            tocLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        }
+
+        window.addEventListener('scroll', updateActiveLink);
+        updateActiveLink();
+
+        // Smooth scrolling for TOC links
+        tocLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('href').substring(1);
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+                
+                // Close mobile menu if open
+                if (tocSidebar.classList.contains('open')) {
+                    tocSidebar.classList.remove('open');
+                }
+            });
+        });
+    </script>
+
+  
+
+</body></html>
