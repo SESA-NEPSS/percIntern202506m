@@ -1,0 +1,37 @@
+# Backup files
+*.backup
+*.bak
+*~
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.pytest_cache/
+.coverage
+
+# Temporary files
+*.tmp
+*.temp
+analyze_data.py
+
+# OS files
+.DS_Store
+Thumbs.db
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~.nib
+
+# Logs
+*.log
